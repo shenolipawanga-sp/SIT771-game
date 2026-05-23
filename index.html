@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Hunter - SIT771</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,900;1,700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f0ebe0;
+  --ink:#120e08;
+  --red:#d41c1c;
+  --yellow:#f5c842;
+  --green:#1a6b1a;
+  --mark:#fff176;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Courier Prime',monospace;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  /* subtle paper grain */
+  
+}
+
+/* ── MASTHEAD ── */
+.masthead{
+  background:var(--ink);
+  color:var(--paper);
+  padding:0 28px;
+}
+.ms-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,0.15);
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  opacity:0.6;
+}
+.ms-main{
+  display:flex;
+  align-items:center;
+  gap:0;
+  padding:8px 0;
+}
+.ms-icon{
+  font-size:48px;
+  padding-right:20px;
+  border-right:3px solid var(--red);
+  margin-right:20px;
+  line-height:1;
+}
+.ms-text h1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:clamp(36px,7vw,72px);
+  letter-spacing:-1px;
+  line-height:1;
+  text-transform:uppercase;
+}
+.ms-text h1 em{font-style:normal;color:var(--red);}
+.ms-text p{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  opacity:0.6;
+  margin-top:4px;
+}
+.ms-stats{
+  margin-left:auto;
+  display:flex;
+  gap:2px;
+}
+.ms-stat{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:10px 16px;
+  text-align:center;
+}
+.ms-stat-n{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:28px;
+  font-weight:900;
+  line-height:1;
+  color:var(--yellow);
+}
+.ms-stat-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;opacity:0.5;margin-top:3px;}
+
+/* ── PROGRESS BAR ── */
+.prog-dots{
+  display:flex;
+  gap:2px;
+  padding:10px 28px;
+  background:rgba(0,0,0,0.08);
+  border-bottom:3px solid var(--ink);
+}
+.pd{width:22px;height:22px;border:2px solid var(--ink);background:transparent;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+.pd.curr{background:var(--yellow);border-color:var(--ink);}
+.pd.ok{background:var(--green);border-color:var(--green);color:white;}
+.pd.bad{background:var(--red);border-color:var(--red);color:white;}
+
+/* ── MAIN ── */
+.main-wrap{max-width:920px;margin:0 auto;padding:0 28px 60px;}
+
+/* START SCREEN */
+.start-screen{
+  padding:48px 0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:start;
+}
+.start-left h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:clamp(32px,5vw,56px);
+  text-transform:uppercase;
+  line-height:1.05;
+  margin-bottom:16px;
+  letter-spacing:-0.5px;
+}
+.start-left h2 mark{background:var(--mark);padding:0 4px;font-style:normal;}
+.start-left p{font-size:14px;line-height:1.8;color:#444;margin-bottom:24px;}
+.pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;}
+.pill{border:2px solid var(--ink);padding:4px 12px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.pill.red{background:var(--red);color:white;border-color:var(--red);}
+.start-right{
+  background:var(--ink);
+  color:var(--paper);
+  padding:24px;
+  font-size:12px;
+  line-height:1.9;
+}
+.start-right pre{font-family:'Courier Prime',monospace;font-size:12px;line-height:1.8;}
+.start-right .bug-line{background:var(--red);color:white;padding:0 2px;display:block;}
+.start-right .cm{opacity:0.5;font-style:italic;}
+
+/* CHALLENGE */
+.chal-wrap{padding:24px 0;}
+
+.chal-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  padding-bottom:12px;
+  border-bottom:3px solid var(--ink);
+  margin-bottom:18px;
+}
+.chal-num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:80px;
+  line-height:1;
+  color:#ddd6c8;
+}
+.chal-info h2{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  font-size:22px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:6px;
+}
+.diff-stamp{
+  display:inline-block;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:3px 10px;
+  border:2px solid;
+}
+.diff-stamp.easy{border-color:var(--green);color:var(--green);}
+.diff-stamp.medium{border-color:#b8860b;color:#b8860b;}
+.diff-stamp.hard{border-color:var(--red);color:var(--red);}
+.chal-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.ibtn{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:8px 16px;
+  border:2px solid var(--ink);
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+  transition:all 0.1s;
+}
+.ibtn:hover{background:var(--ink);color:var(--paper);}
+.ibtn.primary{background:var(--ink);color:var(--paper);}
+.ibtn.primary:hover{background:#333;}
+.ibtn:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* TIMER */
+.timer-strip{height:5px;background:#e0d8c8;margin-bottom:16px;overflow:hidden;}
+.timer-fill{height:100%;background:var(--ink);transition:width 0.5s linear;}
+
+/* CODE BLOCK */
+.code-wrap{
+  background:var(--ink);
+  color:#c8c0b0;
+  margin-bottom:20px;
+  border:3px solid var(--ink);
+}
+.code-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 16px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.code-fname{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#888;
+}
+.code-body{padding:14px 16px;overflow-x:auto;}
+.code-body pre{font-family:'Courier Prime',monospace;font-size:13px;line-height:1.85;}
+.cline{display:block;white-space:pre;}
+.cline.bug{background:rgba(212,28,28,0.25);outline:1px solid rgba(212,28,28,0.5);}
+.lnum{display:inline-block;width:26px;opacity:0.3;font-size:11px;}
+.kw{color:#ff7b7b;}.tp{color:#ffcc80;}.str{color:#a5d6ff;}.cm{color:#6a8a6a;font-style:italic;}
+
+/* OPTIONS */
+.opts-hed{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:#888;
+  padding-bottom:8px;
+  border-bottom:1px solid #ccc;
+  margin-bottom:12px;
+}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.obtn{
+  background:var(--paper);
+  border:2px solid var(--ink);
+  padding:12px 14px;
+  cursor:pointer;
+  font-family:'Courier Prime',monospace;
+  font-size:13px;
+  color:var(--ink);
+  text-align:left;
+  transition:all 0.1s;
+  line-height:1.5;
+}
+.obtn:hover{background:var(--ink);color:var(--paper);}
+.obtn.ok{background:#d4edda;border-color:var(--green);color:#0a3a0a;}
+.obtn.no{background:#fce4e4;border-color:var(--red);color:#5a0a0a;}
+
+/* HINT */
+.hint-box{
+  background:var(--mark);
+  border:2px solid var(--ink);
+  padding:10px 14px;
+  font-size:13px;
+  margin-bottom:14px;
+  display:none;
+}
+.hint-box.show{display:block;}
+
+/* FEEDBACK */
+.fbbox{
+  border:3px solid var(--ink);
+  padding:16px 18px;
+  margin-bottom:18px;
+  display:none;
+}
+.fbbox.show{display:block;}
+.fb-hed{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:18px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:8px;
+}
+.fb-hed.ok{color:var(--green);}.fb-hed.no{color:var(--red);}
+.fb-body{font-size:13px;line-height:1.7;color:#333;}
+.fb-fix{
+  background:var(--ink);
+  color:#a8e6a0;
+  font-family:'Courier Prime',monospace;
+  font-size:12px;
+  padding:10px 14px;
+  margin-top:10px;
+  line-height:1.7;
+}
+
+/* END */
+.end-screen{display:none;padding:40px 0;text-align:center;}
+.end-screen.show{display:block;}
+.end-grade-box{
+  display:inline-block;
+  border:4px solid var(--ink);
+  padding:32px 48px;
+  margin:20px 0;
+}
+.end-n{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;
+  font-size:96px;
+  line-height:1;
+  letter-spacing:-4px;
+}
+.end-grade{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin:8px 0 0;
+}
+
+footer{
+  background:var(--ink);
+  color:rgba(240,235,224,0.5);
+  padding:14px 28px;
+  display:flex;justify-content:space-between;
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+}
+
+@media(max-width:640px){
+  .start-screen{grid-template-columns:1fr;}.start-right{display:none;}
+  .opts-grid{grid-template-columns:1fr;}
+  .code-body pre{font-size:11px;}
+  .ms-stats{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="ms-top">
+    <span>SIT771 Object-Oriented Development in C#</span>
+    <span>Debug Challenge Series</span>
+  </div>
+  <div class="ms-main">
+
+    <div class="ms-text">
+      <h1>BUG <em>HUNTER</em></h1>
+      <p>Find the C# Error · 10 Challenges</p>
+    </div>
+    <div class="ms-stats">
+      <div class="ms-stat"><div class="ms-stat-n" id="scV">0</div><div class="ms-stat-l">Score</div></div>
+      <div class="ms-stat"><div class="ms-stat-n" id="wrV">0</div><div class="ms-stat-l">Wrong</div></div>
+      <div class="ms-stat"><div class="ms-stat-n" id="qV">-</div><div class="ms-stat-l">Round</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="prog-dots" id="pdots"></div>
+
+<div class="main-wrap">
+
+  <div id="startScr" class="start-screen">
+    <div class="start-left">
+      <h2>Can you find the <mark>bug</mark> in the code?</h2>
+      <p>Each challenge shows a C# snippet with a hidden error. Read the code, spot the bug, and pick the correct explanation. 10 OOP-focused challenges.</p>
+      <div class="pill-row">
+        <span class="pill red">10 Challenges</span>
+        <span class="pill">OOP Focused</span>
+        <span class="pill">30s Timer</span>
+        <span class="pill">Hints</span>
+      </div>
+      <button class="ibtn primary" onclick="startGame()" style="font-size:14px;padding:12px 28px;">START HUNTING →</button>
+    </div>
+    <div class="start-right">
+      <div style="font-family:'Barlow Condensed',monospace;font-size:10px;letter-spacing:2px;opacity:0.5;margin-bottom:12px;text-transform:uppercase;">// Example: Spot the Bug</div>
+      <pre>
+<span class="kw">class</span> BankAccount {
+  <span class="kw">private</span> <span class="tp">decimal</span> balance;
+}
+
+<span class="kw">class</span> Program {
+  <span class="kw">static</span> <span class="kw">void</span> Main() {
+    <span class="tp">var</span> acc = <span class="kw">new</span> BankAccount();
+<span class="bug-line">    Console.WriteLine(acc.balance); <span class="cm">//</span></span>
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div id="gameArea" style="display:none">
+    <div class="chal-wrap">
+      <div class="chal-top">
+        <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;">
+          <div class="chal-num" id="cNum">01</div>
+          <div class="chal-info">
+            <h2 id="cTitle"></h2>
+            <span class="diff-stamp" id="dStamp">Easy</span>
+          </div>
+        </div>
+        <div class="chal-btns">
+          <button class="ibtn" id="hintBtn" onclick="showHint()">HINT</button>
+          <button class="ibtn" onclick="skipChal()">SKIP →</button>
+        </div>
+      </div>
+      <div class="timer-strip"><div class="timer-fill" id="tFill" style="width:100%"></div></div>
+      <div style="font-size:14px;line-height:1.7;color:#444;margin-bottom:14px;" id="cDesc"></div>
+      <div class="code-wrap">
+        <div class="code-top">
+          <span class="code-fname" id="cFile">Program.cs</span>
+          <span style="font-size:10px;opacity:0.4;letter-spacing:1px;">// FIND THE BUG</span>
+        </div>
+        <div class="code-body"><pre id="cCode"></pre></div>
+      </div>
+      <div class="hint-box" id="hintBox"></div>
+      <div class="fbbox" id="fbBox">
+        <div class="fb-hed" id="fbHed"></div>
+        <div class="fb-body" id="fbBdy"></div>
+        <div class="fb-fix" id="fbFix"></div>
+      </div>
+      <div class="opts-hed">- What is the bug? -</div>
+      <div class="opts-grid" id="oGrid"></div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="ibtn primary" id="nxtBtn" onclick="nextChal()" disabled>NEXT CHALLENGE →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="end-screen" id="endScr">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#888;margin-bottom:8px;">Final Score</div>
+    <div class="end-grade-box">
+      <div class="end-n" id="endN">0/10</div>
+      <div class="end-grade" id="endG"></div>
+    </div>
+    <br>
+    <button class="ibtn primary" style="padding:12px 28px;font-size:14px;" onclick="resetGame()">PLAY AGAIN</button>
+  </div>
+
+</div>
+
+<footer>
+  <span>SIT771 Object-Oriented Development</span>
+  <span>10 Real C# Debugging Challenges</span>
+</footer>
+
+<script>
+const CH=[
+  {t:"Accessing a private field",d:"Code tries to access a BankAccount's balance from outside the class.",f:"BankAccount.cs",diff:"easy",bl:1,
+   c:["class BankAccount {","    private decimal balance = 1000;","}","","class Program {","    static void Main() {","        BankAccount acc = new BankAccount();","        Console.WriteLine(acc.balance);  // line 8","    }","}"],
+   o:["BankAccount is not instantiated correctly","balance is private - cannot be accessed outside its class","Console.WriteLine cannot print decimals","new keyword is missing"],
+   a:1,h:"Look at the access modifier on the balance field.",fx:"// Fix: Add a public property\npublic decimal Balance { get; private set; } = 1000;",e:"The field 'balance' is marked private, so it cannot be accessed from outside BankAccount. Expose it via a public property instead."},
+  {t:"Missing override keyword",d:"A Shape hierarchy is set up, but the derived class doesn't override the virtual method correctly.",f:"Shapes.cs",diff:"easy",bl:7,
+   c:["class Shape {","    public virtual string Describe() {","        return \"I am a shape\";","    }","}","","class Circle : Shape {","    public string Describe() {    // line 8","        return \"I am a circle\";","    }","}"],
+   o:["Circle should use 'extends' instead of ':'","Describe() in Shape should be abstract","Missing 'override' keyword in Circle.Describe()","Circle cannot inherit from Shape"],
+   a:2,h:"What keyword is needed when a derived class replaces a virtual method?",fx:"public override string Describe() {\n    return \"I am a circle\";\n}",e:"Without 'override', the method hides the parent's method but doesn't participate in virtual dispatch. Use 'override' for correct polymorphic behaviour."},
+  {t:"Instantiating an abstract class",d:"Code tries to create an instance of an abstract class directly.",f:"Animal.cs",diff:"easy",bl:4,
+   c:["abstract class Animal {","    public abstract void Speak();","}","","Animal a = new Animal();    // line 5","a.Speak();"],
+   o:["Speak() has no return type","Animal needs a constructor","Abstract classes cannot have methods","Cannot instantiate an abstract class with 'new'"],
+   a:3,h:"Abstract classes have a specific restriction around object creation.",fx:"// Fix: Create a concrete derived class\nclass Dog : Animal {\n    public override void Speak() => Console.WriteLine(\"Woof!\");\n}\nAnimal a = new Dog();",e:"Abstract classes cannot be instantiated directly. You must derive a concrete class that implements all abstract members."},
+  {t:"No default constructor",d:"A class has only a parameterised constructor. The code tries to call the wrong form.",f:"Product.cs",diff:"easy",bl:10,
+   c:["class Product {","    public string Name;","    public decimal Price;","","    public Product(string name, decimal price) {","        Name = name;","        Price = price;","    }","}","","Product p = new Product();   // line 11"],
+   o:["Product fields should be private","Constructor uses wrong parameter types","No default (parameterless) constructor exists","new Product() is always valid"],
+   a:2,h:"Once you define a parameterised constructor, what happens to the default one?",fx:"// Fix: provide arguments\nProduct p = new Product(\"Laptop\", 1299.99m);",e:"When you define a parameterised constructor, C# no longer generates a default parameterless one. Provide arguments or explicitly add a default constructor."},
+  {t:"NullReferenceException risk",d:"This code will throw a NullReferenceException at runtime. Find the problematic line.",f:"Customer.cs",diff:"medium",bl:4,
+   c:["class Customer {","    public string Name;","}","","Customer c = null;","Console.WriteLine(c.Name);   // line 6"],
+   o:["Customer needs a constructor","Name should be a property","Calling .Name on null throws NullReferenceException","Console.WriteLine doesn't accept strings"],
+   a:2,h:"What value does 'c' hold on line 5?",fx:"// Fix: instantiate before use\nCustomer c = new Customer();\nConsole.WriteLine(c.Name);",e:"The variable 'c' is null - it holds no object reference. Accessing .Name on null causes a NullReferenceException. Always instantiate objects before use."},
+  {t:"Index out of range",d:"A List is populated then accessed with the wrong index.",f:"Collections.cs",diff:"medium",bl:5,
+   c:["List<string> items = new List<string>();","items.Add(\"Apple\");","items.Add(\"Banana\");","items.Add(\"Cherry\");","","Console.WriteLine(items[3]);  // line 6"],
+   o:["List<string> cannot store strings","items.Add() is the wrong method","Index 3 is out of range - valid indices are 0, 1, 2","Console.WriteLine cannot print list items"],
+   a:2,h:"Lists in C# are zero-indexed. Last item of 3 is at index…?",fx:"Console.WriteLine(items[2]); // or items[items.Count - 1]",e:"C# lists are zero-indexed. With 3 elements, valid indices are 0, 1, and 2. Index 3 throws an IndexOutOfRangeException."},
+  {t:"Missing interface implementation",d:"A class claims to implement an interface but is missing a required method.",f:"Drawable.cs",diff:"medium",bl:5,
+   c:["interface IDrawable {","    void Draw();","    void Resize(int factor);","}","","class Square : IDrawable {","    public void Draw() {","        Console.WriteLine(\"Drawing\");","    }","    // Resize() is not implemented","}"],
+   o:["'interface' should be capitalised","Square cannot implement IDrawable","Draw() uses wrong return type","Resize(int factor) not implemented - violates the contract"],
+   a:3,h:"When implementing an interface, what must the class do with every declared member?",fx:"public void Resize(int factor) {\n    // implementation here\n}",e:"A class implementing an interface must provide bodies for ALL declared members. Missing Resize() causes a compile error."},
+  {t:"Static method accessing instance field",d:"A static method tries to access a non-static class member.",f:"Counter.cs",diff:"medium",bl:4,
+   c:["class Counter {","    public int count = 0;","","    public static void Increment() {","        count++;   // line 5","    }","}"],
+   o:["count should be initialised to 1","Method should return int","Static method cannot access non-static instance members","++ is not valid for int fields"],
+   a:2,h:"Static methods belong to the class, not an instance. What does that mean for instance fields?",fx:"// Fix: make count static\npublic static int count = 0;\n\npublic static void Increment() {\n    count++;\n}",e:"Static methods don't have 'this' - they're not tied to any instance. They cannot access instance fields directly. Make count static, or pass an instance as a parameter."},
+  {t:"Wrong exception type caught",d:"A division operation may fail, but the handler catches the wrong exception type.",f:"Division.cs",diff:"hard",bl:5,
+   c:["int a = 10, b = 0;","try {","    int result = a / b;","    Console.WriteLine(result);","}","catch (NullReferenceException ex) {  // line 6","    Console.WriteLine(\"Error: \" + ex.Message);","}"],
+   o:["int division needs decimal types","try block cannot contain Console.WriteLine","DivideByZeroException should be caught, not NullReferenceException","Variables a and b should be inside try"],
+   a:2,h:"What specific exception does integer division by zero throw in C#?",fx:"catch (DivideByZeroException ex) {\n    Console.WriteLine(\"Cannot divide by zero: \" + ex.Message);\n}",e:"Integer division by zero throws DivideByZeroException. Catching NullReferenceException means the handler never fires and the exception propagates uncaught."},
+  {t:"Infinite loop",d:"A while loop intended to count 0–9 never terminates. Find the bug.",f:"Loop.cs",diff:"hard",bl:3,
+   c:["int i = 0;","while (i < 10) {","    Console.WriteLine(i);","    i--;   // line 4","}"],
+   o:["Console.WriteLine should use i.ToString()","while should be do-while","Condition i < 10 is inverted","i-- decrements instead of incrementing - infinite loop"],
+   a:3,h:"If i starts at 0 and runs while i < 10, which direction should i move?",fx:"i++;   // increment, not decrement",e:"i-- decrements i each iteration making it -1, -2, -3 etc. - always less than 10. The condition never becomes false. Use i++ to count upward."}
+];
+
+let idx=0,sc=0,wr=0,answered=false,results=[],timerTO=null;
+
+function startGame(){
+  document.getElementById('startScr').style.display='none';
+  document.getElementById('gameArea').style.display='block';
+  idx=0;sc=0;wr=0;results=[];
+  renderDots();loadChal();
+}
+
+function renderDots(){
+  document.getElementById('pdots').innerHTML=CH.map((_,i)=>{
+    let c='';if(i<idx)c=results[i]?'ok':'bad';else if(i===idx)c='curr';
+    return`<div class="pd ${c}">${i+1}</div>`;
+  }).join('');
+}
+
+function loadChal(){
+  const c=CH[idx];answered=false;clearTimeout(timerTO);
+  document.getElementById('cNum').textContent=String(idx+1).padStart(2,'0');
+  document.getElementById('cTitle').textContent=c.t;
+  const ds=document.getElementById('dStamp');
+  ds.textContent=c.diff.charAt(0).toUpperCase()+c.diff.slice(1);
+  ds.className=`diff-stamp ${c.diff}`;
+  document.getElementById('cFile').textContent=c.f;
+  document.getElementById('cDesc').textContent=c.d;
+  document.getElementById('qV').textContent=`${idx+1}/10`;
+  document.getElementById('cCode').innerHTML=c.c.map((line,i)=>
+    `<span class="cline ${i===c.bl?'bug':''}"><span class="lnum">${i+1}</span>${hl(line)}</span>`).join('\n');
+  document.getElementById('oGrid').innerHTML=c.o.map((o,i)=>
+    `<button class="obtn" id="ob${i}" onclick="pickOpt(${i})">${o}</button>`).join('');
+  document.getElementById('hintBox').classList.remove('show');
+  document.getElementById('fbBox').classList.remove('show');
+  document.getElementById('nxtBtn').disabled=true;
+  document.getElementById('hintBtn').disabled=false;
+  const tf=document.getElementById('tFill');
+  tf.style.transition='none';tf.style.width='100%';
+  setTimeout(()=>{tf.style.transition='width 30s linear';tf.style.width='0%';},60);
+  timerTO=setTimeout(()=>{if(!answered)autoFail();},30000);
+}
+
+function hl(code){
+  return code
+    .replace(/\/\/.*/g,m=>`<span class="cm">${m}</span>`)
+    .replace(/\b(class|interface|abstract|sealed|public|private|protected|static|void|new|return|if|else|while|try|catch|null|this|base|override|virtual)\b/g,m=>`<span class="kw">${m}</span>`)
+    .replace(/\b(int|string|bool|decimal|double|float|char|var|List)\b/g,m=>`<span class="tp">${m}</span>`)
+    .replace(/"[^"]*"/g,m=>`<span class="str">${m}</span>`);
+}
+
+function pickOpt(i){
+  if(answered)return;answered=true;clearTimeout(timerTO);
+  document.getElementById('tFill').style.transition='none';
+  const c=CH[idx];const ok=i===c.a;
+  document.querySelectorAll('.obtn').forEach((b,j)=>{b.disabled=true;if(j===c.a)b.classList.add('ok');else if(j===i)b.classList.add('no');});
+  if(ok){sc++;results.push(true);}else{wr++;results.push(false);}
+  document.getElementById('scV').textContent=sc;
+  document.getElementById('wrV').textContent=wr;
+  const fb=document.getElementById('fbBox');fb.classList.add('show');
+  document.getElementById('fbHed').textContent=ok?'✓ Correct. Bug identified.':'✗ Not quite - here\'s the bug:';
+  document.getElementById('fbHed').className=`fb-hed ${ok?'ok':'no'}`;
+  document.getElementById('fbBdy').textContent=c.e;
+  document.getElementById('fbFix').textContent=c.fx;
+  document.getElementById('nxtBtn').disabled=false;
+  document.getElementById('hintBtn').disabled=true;
+  renderDots();
+}
+
+function showHint(){
+  const c=CH[idx];
+  document.getElementById('hintBox').textContent=' '+c.h;
+  document.getElementById('hintBox').classList.add('show');
+  document.getElementById('hintBtn').disabled=true;
+}
+
+function autoFail(){
+  if(answered)return;answered=true;wr++;results.push(false);
+  const c=CH[idx];
+  document.querySelectorAll('.obtn').forEach((b,j)=>{b.disabled=true;if(j===c.a)b.classList.add('ok');});
+  document.getElementById('scV').textContent=sc;
+  document.getElementById('wrV').textContent=wr;
+  const fb=document.getElementById('fbBox');fb.classList.add('show');
+  document.getElementById('fbHed').textContent="⏱ Time's up!";
+  document.getElementById('fbHed').className='fb-hed no';
+  document.getElementById('fbBdy').textContent=c.e;
+  document.getElementById('fbFix').textContent=c.fx;
+  document.getElementById('nxtBtn').disabled=false;
+  renderDots();
+}
+
+function skipChal(){
+  if(!answered){answered=true;clearTimeout(timerTO);wr++;results.push(false);renderDots();}
+  nextChal();
+}
+
+function nextChal(){
+  idx++;
+  if(idx>=CH.length){showEnd();return;}
+  document.getElementById('fbBox').classList.remove('show');
+  document.getElementById('hintBox').classList.remove('show');
+  renderDots();loadChal();
+}
+
+function showEnd(){
+  document.getElementById('gameArea').style.display='none';
+  document.getElementById('endScr').classList.add('show');
+  const pct=Math.round(sc/CH.length*100);
+  document.getElementById('endN').textContent=`${sc}/${CH.length}`;
+  let g;if(pct>=80)g='Elite Bug Hunter';else if(pct>=60)g='Good Eye for Bugs';else if(pct>=40)g='Keep Debugging';else g='Review C# Basics';
+  document.getElementById('endG').textContent=g;
+}
+
+function resetGame(){
+  document.getElementById('endScr').classList.remove('show');
+  document.getElementById('startScr').style.display='grid';
+  document.getElementById('pdots').innerHTML='';
+  ['scV','wrV'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('qV').textContent='-';
+}
+</script>
+</body>
+</html>
